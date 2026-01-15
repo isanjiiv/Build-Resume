@@ -5,19 +5,25 @@ import { TemplateCard } from '@/components/TemplateCard';
 import { TemplateId } from '@/types/resume';
 import { useResume } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileText, Sparkles, Download, Globe } from 'lucide-react';
+import { ArrowRight, FileText, Sparkles, Download, Globe, Check } from 'lucide-react'; // Added Check
 
 export default function Index() {
   const navigate = useNavigate();
   const { selectedTemplate, setSelectedTemplate } = useResume();
   const [hoveredTemplate, setHoveredTemplate] = useState<TemplateId | null>(null);
+  
+  // New state for Declaration option
+  const [includeDeclaration, setIncludeDeclaration] = useState(false);
 
   const handleTemplateSelect = (id: TemplateId) => {
     setSelectedTemplate(id);
   };
 
   const handleStartBuilding = () => {
-    navigate('/builder');
+    // Navigate with the declaration state preference
+    navigate('/builder', { 
+      state: { withDeclaration: includeDeclaration } 
+    });
   };
 
   return (
@@ -97,8 +103,27 @@ export default function Index() {
             ))}
           </div>
 
-          {/* CTA */}
+          {/* CTA with Declaration Option */}
           <div className="text-center animate-fade-in">
+            
+            {/* NEW: Declaration Checkbox */}
+            <div 
+              className="flex items-center justify-center gap-2 mb-6 cursor-pointer group select-none"
+              onClick={() => setIncludeDeclaration(!includeDeclaration)}
+            >
+              <div className={`
+                w-5 h-5 rounded border flex items-center justify-center transition-all duration-200
+                ${includeDeclaration 
+                  ? 'bg-primary border-primary' 
+                  : 'border-muted-foreground/30 bg-background group-hover:border-primary'}
+              `}>
+                {includeDeclaration && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+              </div>
+              <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                Include <strong>Declaration</strong> section in resume
+              </span>
+            </div>
+
             <Button
               size="lg"
               onClick={handleStartBuilding}

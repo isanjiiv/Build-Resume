@@ -3,6 +3,7 @@ import { ResumeData } from '@/types/resume';
 export const sampleResumeData: ResumeData = {
   personalInfo: {
     fullName: 'Sarah Mitchell',
+    position: 'Senior Software Engineer',
     email: 'sarah.mitchell@email.com',
     phone: '(555) 123-4567',
     location: 'San Francisco, CA',
@@ -75,6 +76,7 @@ export const sampleResumeData: ResumeData = {
 export const emptyResumeData: ResumeData = {
   personalInfo: {
     fullName: '',
+    position: '',
     email: '',
     phone: '',
     location: '',

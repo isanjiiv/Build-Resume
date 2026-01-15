@@ -189,6 +189,15 @@ export function ResumeForm() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="position">Position (optional)</Label>
+                  <Input
+                    id="position"
+                    value={resumeData.personalInfo.position || ''}
+                    onChange={(e) => updatePersonalInfo('position', e.target.value)}
+                    placeholder="Software Engineer"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"

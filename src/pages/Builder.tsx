@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react'; // 1. Added useEffect
+import { useNavigate, useLocation } from 'react-router-dom'; // 2. Added useLocation
 import { useResume } from '@/context/ResumeContext';
 import { ResumeForm } from '@/components/ResumeForm';
 import { ResumePreview } from '@/components/templates/ResumePreview';
@@ -25,9 +25,26 @@ import { TemplateId } from '@/types/resume';
 
 export default function Builder() {
   const navigate = useNavigate();
-  const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
+  const location = useLocation(); // 3. Get the location object
+  
+  // 4. Added setResumeData here so we can update the state
+  const { resumeData, setResumeData, selectedTemplate, setSelectedTemplate } = useResume();
+  
   const [showPreview, setShowPreview] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // 5. NEW LOGIC: Check for declaration preference on page load
+  useEffect(() => {
+    // Check if the user selected the checkbox on the home page
+    if (location.state?.withDeclaration) {
+      setResumeData(prev => ({
+        ...prev,
+        // This assumes your resume data structure supports a boolean flag 
+        // or a specific section for the declaration
+        hasDeclaration: true 
+      }));
+    }
+  }, [location.state, setResumeData]);
 
   const handleExportPDF = async () => {
     // Create a printable version

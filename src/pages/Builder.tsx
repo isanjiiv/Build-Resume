@@ -1,73 +1,207 @@
-const handleExportPDF = async () => {
-    // 1. Get the container element
-    const templateComponent = document.querySelector('.resume-preview-container');
-    if (!templateComponent) return;
+import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useResume } from '@/context/ResumeContext';
+import { ResumeForm } from '@/components/ResumeForm';
+import { ResumePreview } from '@/components/templates/ResumePreview';
+import { templates } from '@/data/templates';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  ArrowLeft,
+  Download,
+  Eye,
+  EyeOff,
+  FileText,
+  Globe,
+  Palette,
+} from 'lucide-react';
+import { TemplateId } from '@/types/resume';
 
-    // 2. Open the print window
+export default function Builder() {
+  const navigate = useNavigate();
+  const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
+  const [showPreview, setShowPreview] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  const handleExportPDF = async () => {
+    // Create a printable version
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // 3. COLLECT STYLES: This is the critical fix. 
-    // We grab all Tailwind styles, fonts, and custom CSS from the current page.
-    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map(style => style.outerHTML)
-      .join('');
+    const templateComponent = document.querySelector('.resume-preview-container');
+    if (!templateComponent) return;
 
-    // 4. Write the document
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>Resume - ${resumeData.personalInfo.fullName || 'Download'}</title>
-          
-          ${styles}
-          
           <style>
-            /* Reset body for printing */
-            body { 
-              margin: 0; 
-              padding: 0; 
-              background: white;
-              -webkit-print-color-adjust: exact !important; 
-              print-color-adjust: exact !important; 
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; }
+            @page { size: A4; margin: 0; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             }
-
-            /* Force A4 sizing */
-            @page { 
-              size: A4; 
-              margin: 0; 
-            }
-
-            /* Ensure the resume container takes up the full page without scaling issues */
-            .resume-preview-container {
-              width: 100% !important;
-              max-width: 210mm !important; /* A4 Width */
-              min-height: 297mm !important; /* A4 Height */
-              margin: 0 auto !important;
-              box-shadow: none !important;
-              border: none !important;
-              border-radius: 0 !important;
-              transform: none !important;
-            }
-            
-            /* Hide any scrollbars or interactive elements that might have been copied */
-            ::-webkit-scrollbar { display: none; }
           </style>
         </head>
         <body>
-          ${templateComponent.outerHTML}
-          <script>
-            // Wait slightly for styles/fonts to apply before printing
-            window.onload = () => {
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 500);
-            };
-          </script>
+          ${templateComponent.innerHTML}
         </body>
       </html>
     `);
 
     printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
   };
+
+  const handleExportHTML = () => {
+    const templateComponent = document.querySelector('.resume-preview-container');
+    if (!templateComponent) return;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume - ${resumeData.personalInfo.fullName || 'Download'}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  ${templateComponent.innerHTML}
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `resume-${resumeData.personalInfo.fullName?.toLowerCase().replace(/\s+/g, '-') || 'download'}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleViewPortfolio = () => {
+    navigate('/portfolio');
+  };
+
+  return (
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Templates
+            </Button>
+            <div className="h-6 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <Palette className="w-4 h-4 text-muted-foreground" />
+              <Select
+                value={selectedTemplate}
+                onValueChange={(value) => setSelectedTemplate(value as TemplateId)}
+              >
+                <SelectTrigger className="w-[180px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
+              <Globe className="w-4 h-4 mr-2" />
+              Portfolio
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportHTML}>
+              <FileText className="w-4 h-4 mr-2" />
+              HTML
+            </Button>
+            <Button size="sm" onClick={handleExportPDF}>
+              <Download className="w-4 h-4 mr-2" />
+              PDF
+            </Button>
+          </div>
+
+          {/* Mobile Preview Toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setShowPreview(!showPreview)}
+          >
+            {showPreview ? (
+              <>
+                <EyeOff className="w-4 h-4 mr-2" />
+                Edit
+              </>
+            ) : (
+              <>
+                <Eye className="w-4 h-4 mr-2" />
+                Preview
+              </>
+            )}
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Editor Panel */}
+        <div
+          className={`w-full md:w-1/2 lg:w-[45%] editor-panel overflow-hidden ${
+            showPreview ? 'hidden md:block' : ''
+          }`}
+        >
+          <ResumeForm />
+        </div>
+
+        {/* Preview Panel */}
+        <div
+          className={`w-full md:w-1/2 lg:w-[55%] preview-panel ${
+            !showPreview ? 'hidden md:flex' : 'flex'
+          }`}
+          ref={previewRef}
+        >
+          <div className="resume-preview-container shadow-elevated rounded-lg overflow-hidden">
+            <ResumePreview templateId={selectedTemplate} data={resumeData} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Floating Actions */}
+      <div className="floating-actions md:hidden">
+        <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
+          <Globe className="w-4 h-4" />
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExportHTML}>
+          <FileText className="w-4 h-4" />
+        </Button>
+        <Button size="sm" onClick={handleExportPDF}>
+          <Download className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}

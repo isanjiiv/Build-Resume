@@ -3,15 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useResume } from '@/context/ResumeContext';
 import { ResumeForm } from '@/components/ResumeForm';
 import { ResumePreview } from '@/components/templates/ResumePreview';
+import { PreviewModal } from '@/components/PreviewModal';
 import { templates } from '@/data/templates';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   ArrowLeft,
   Download,
@@ -19,22 +13,27 @@ import {
   EyeOff,
   FileText,
   Globe,
-  Palette,
+  Lock,
 } from 'lucide-react';
-import { TemplateId } from '@/types/resume';
+import { Badge } from '@/components/ui/badge';
 
 export default function Builder() {
   const navigate = useNavigate();
-  const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
+  const { resumeData, selectedTemplate } = useResume();
   const [showPreview, setShowPreview] = useState(false);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  // Get current template info
+  const currentTemplate = templates.find((t) => t.id === selectedTemplate);
+
   const handleExportPDF = async () => {
-    // Create a printable version
+    // Create a printable version from the preview
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const templateComponent = document.querySelector('.resume-preview-container');
+    const templateComponent = document.querySelector('.resume-preview-container') || 
+                              document.querySelector('.resume-preview-modal');
     if (!templateComponent) return;
 
     printWindow.document.write(`
@@ -64,7 +63,8 @@ export default function Builder() {
   };
 
   const handleExportHTML = () => {
-    const templateComponent = document.querySelector('.resume-preview-container');
+    const templateComponent = document.querySelector('.resume-preview-container') ||
+                              document.querySelector('.resume-preview-modal');
     if (!templateComponent) return;
 
     const htmlContent = `
@@ -97,6 +97,8 @@ export default function Builder() {
     navigate('/portfolio');
   };
 
+  const hasData = resumeData.personalInfo.fullName || resumeData.summary || resumeData.skills.length > 0;
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
@@ -108,37 +110,35 @@ export default function Builder() {
               Templates
             </Button>
             <div className="h-6 w-px bg-border" />
+            {/* Locked Template Display */}
             <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-muted-foreground" />
-              <Select
-                value={selectedTemplate}
-                onValueChange={(value) => setSelectedTemplate(value as TemplateId)}
-              >
-                <SelectTrigger className="w-[180px] h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {templates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Lock className="w-4 h-4 text-primary" />
+              <Badge variant="secondary" className="font-medium">
+                {currentTemplate?.name || 'Modern Sidebar'}
+              </Badge>
             </div>
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setPreviewModalOpen(true)}
+              disabled={!hasData}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview Resume
+            </Button>
             <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
               <Globe className="w-4 h-4 mr-2" />
               Portfolio
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExportHTML}>
+            <Button variant="outline" size="sm" onClick={handleExportHTML} disabled={!hasData}>
               <FileText className="w-4 h-4 mr-2" />
               HTML
             </Button>
-            <Button size="sm" onClick={handleExportPDF}>
+            <Button size="sm" onClick={handleExportPDF} disabled={!hasData}>
               <Download className="w-4 h-4 mr-2" />
               PDF
             </Button>
@@ -190,18 +190,36 @@ export default function Builder() {
         </div>
       </div>
 
-      {/* Mobile Floating Actions */}
+      {/* Mobile Floating Actions - Sticky Bottom Bar */}
       <div className="floating-actions md:hidden">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setPreviewModalOpen(true)}
+          disabled={!hasData}
+        >
+          <Eye className="w-4 h-4" />
+        </Button>
         <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
           <Globe className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="sm" onClick={handleExportHTML}>
+        <Button variant="outline" size="sm" onClick={handleExportHTML} disabled={!hasData}>
           <FileText className="w-4 h-4" />
         </Button>
-        <Button size="sm" onClick={handleExportPDF}>
+        <Button size="sm" onClick={handleExportPDF} disabled={!hasData}>
           <Download className="w-4 h-4" />
         </Button>
       </div>
+
+      {/* Preview Modal */}
+      <PreviewModal
+        open={previewModalOpen}
+        onOpenChange={setPreviewModalOpen}
+        templateId={selectedTemplate}
+        data={resumeData}
+        onExportPDF={handleExportPDF}
+        onExportHTML={handleExportHTML}
+      />
     </div>
   );
 }

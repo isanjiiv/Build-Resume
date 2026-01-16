@@ -7,19 +7,26 @@ import { PreviewModal } from '@/components/PreviewModal';
 import { templates } from '@/data/templates';
 import { Button } from '@/components/ui/button';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   ArrowLeft,
   Download,
   Eye,
   EyeOff,
   FileText,
   Globe,
-  Lock,
+  Palette,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { TemplateId } from '@/types/resume';
 
 export default function Builder() {
   const navigate = useNavigate();
-  const { resumeData, selectedTemplate } = useResume();
+  const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
   const [showPreview, setShowPreview] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -110,12 +117,24 @@ export default function Builder() {
               Templates
             </Button>
             <div className="h-6 w-px bg-border" />
-            {/* Locked Template Display */}
+            {/* Template Selector - Free Switching */}
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-primary" />
-              <Badge variant="secondary" className="font-medium">
-                {currentTemplate?.name || 'Modern Sidebar'}
-              </Badge>
+              <Palette className="w-4 h-4 text-muted-foreground" />
+              <Select
+                value={selectedTemplate}
+                onValueChange={(value) => setSelectedTemplate(value as TemplateId)}
+              >
+                <SelectTrigger className="w-[180px] h-9">
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

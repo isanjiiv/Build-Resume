@@ -21,52 +21,63 @@ import {
   FileText,
   Globe,
   Palette,
+  Loader2,
 } from 'lucide-react';
 import { TemplateId } from '@/types/resume';
+import { toast } from 'sonner';
+import html2pdf from 'html2pdf.js';
 
 export default function Builder() {
   const navigate = useNavigate();
   const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
   const [showPreview, setShowPreview] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Get current template info
   const currentTemplate = templates.find((t) => t.id === selectedTemplate);
 
   const handleExportPDF = async () => {
-    // Create a printable version from the preview
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
     const templateComponent = document.querySelector('.resume-preview-container') || 
                               document.querySelector('.resume-preview-modal');
-    if (!templateComponent) return;
+    
+    if (!templateComponent) {
+      toast.error('PDF download failed. Please try again.');
+      return;
+    }
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Resume - ${resumeData.personalInfo.fullName || 'Download'}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; }
-            @page { size: A4; margin: 0; }
-            @media print {
-              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          ${templateComponent.innerHTML}
-        </body>
-      </html>
-    `);
+    setIsExporting(true);
 
-    printWindow.document.close();
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
+    try {
+      const fileName = resumeData.personalInfo.fullName
+        ? `${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
+        : 'Resume.pdf';
+
+      const options = {
+        margin: 0,
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+        },
+        jsPDF: { 
+          unit: 'pt', 
+          format: 'a4', 
+          orientation: 'portrait' as const,
+        },
+      };
+
+      await html2pdf().set(options).from(templateComponent).save();
+      toast.success('Resume downloaded successfully!');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast.error('PDF download failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleExportHTML = () => {
@@ -157,9 +168,13 @@ export default function Builder() {
               <FileText className="w-4 h-4 mr-2" />
               HTML
             </Button>
-            <Button size="sm" onClick={handleExportPDF} disabled={!hasData}>
-              <Download className="w-4 h-4 mr-2" />
-              PDF
+            <Button size="sm" onClick={handleExportPDF} disabled={!hasData || isExporting}>
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {isExporting ? 'Exporting...' : 'PDF'}
             </Button>
           </div>
 
@@ -225,8 +240,12 @@ export default function Builder() {
         <Button variant="outline" size="sm" onClick={handleExportHTML} disabled={!hasData}>
           <FileText className="w-4 h-4" />
         </Button>
-        <Button size="sm" onClick={handleExportPDF} disabled={!hasData}>
-          <Download className="w-4 h-4" />
+        <Button size="sm" onClick={handleExportPDF} disabled={!hasData || isExporting}>
+          {isExporting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
         </Button>
       </div>
 

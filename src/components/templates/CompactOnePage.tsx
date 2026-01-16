@@ -22,9 +22,14 @@ export function CompactOnePage({ data, scale = 1 }: CompactOnePageProps) {
     >
       {/* Compact Header */}
       <div className="flex justify-between items-start border-b border-gray-400 pb-2 mb-3">
-        <h1 className="text-xl font-bold text-gray-900">
-          {personalInfo.fullName || 'Your Name'}
-        </h1>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">
+            {personalInfo.fullName || 'Your Name'}
+          </h1>
+          <p className="text-xs font-semibold text-gray-700">
+            {personalInfo.position || 'Your Job Title'}
+          </p>
+        </div>
         <div className="text-right text-xs text-gray-600">
           <p>{personalInfo.email} | {personalInfo.phone}</p>
           <p>{personalInfo.location}</p>

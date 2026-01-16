@@ -22,9 +22,12 @@ export function CorporateClean({ data, scale = 1 }: CorporateCleanProps) {
     >
       {/* Header */}
       <div className="bg-gray-100 px-8 py-6 border-b-4 border-blue-700">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">
+        <h1 className="text-2xl font-bold text-gray-800 mb-0.5">
           {personalInfo.fullName || 'Your Name'}
         </h1>
+        <p className="text-sm font-semibold text-blue-700 mb-2">
+          {personalInfo.position || 'Your Job Title'}
+        </p>
         <div className="text-gray-600 text-xs flex flex-wrap gap-3">
           {personalInfo.email && <span>{personalInfo.email}</span>}
           {personalInfo.phone && <span>{personalInfo.phone}</span>}

@@ -28,7 +28,9 @@ export function CreativeProfessional({ data, scale = 1 }: CreativeProfessionalPr
             <h1 className="text-2xl font-bold text-gray-900">
               {personalInfo.fullName || 'Your Name'}
             </h1>
-            <div className="text-teal-600 font-medium">Software Engineer</div>
+            <div className="text-teal-600 font-medium">
+              {personalInfo.position || 'Your Job Title'}
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-4 text-xs text-gray-600 pl-6">

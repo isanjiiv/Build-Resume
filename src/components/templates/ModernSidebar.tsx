@@ -26,6 +26,9 @@ export function ModernSidebar({ data, scale = 1 }: ModernSidebarProps) {
           <h1 className="text-lg font-bold leading-tight mb-1">
             {personalInfo.fullName || 'Your Name'}
           </h1>
+          <p className="text-xs text-slate-300 font-medium">
+            {personalInfo.position || 'Your Job Title'}
+          </p>
         </div>
 
         {/* Contact */}

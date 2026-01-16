@@ -22,10 +22,13 @@ export function HeaderFocused({ data, scale = 1 }: HeaderFocusedProps) {
     >
       {/* Bold Header */}
       <div className="bg-indigo-900 text-white px-8 py-6">
-        <h1 className="text-3xl font-bold mb-1">
+        <h1 className="text-3xl font-bold mb-0.5">
           {personalInfo.fullName || 'Your Name'}
         </h1>
-        <div className="text-indigo-200 text-sm space-x-3">
+        <p className="text-lg font-medium text-indigo-200 mb-2">
+          {personalInfo.position || 'Your Job Title'}
+        </p>
+        <div className="text-indigo-300 text-xs space-x-3">
           {personalInfo.email && <span>{personalInfo.email}</span>}
           {personalInfo.phone && <span>• {personalInfo.phone}</span>}
           {personalInfo.location && <span>• {personalInfo.location}</span>}

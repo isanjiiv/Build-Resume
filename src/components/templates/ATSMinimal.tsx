@@ -22,9 +22,12 @@ export function ATSMinimal({ data, scale = 1 }: ATSMinimalProps) {
     >
       {/* Header */}
       <div className="text-center border-b border-gray-300 pb-4 mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+        <h1 className="text-2xl font-bold text-gray-900 mb-0.5">
           {personalInfo.fullName || 'Your Name'}
         </h1>
+        <p className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+          {personalInfo.position || 'Your Job Title'}
+        </p>
         <div className="text-gray-600 text-xs space-x-2">
           {personalInfo.email && <span>{personalInfo.email}</span>}
           {personalInfo.phone && <span>• {personalInfo.phone}</span>}

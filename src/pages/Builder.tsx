@@ -39,11 +39,22 @@ export default function Builder() {
   const currentTemplate = templates.find((t) => t.id === selectedTemplate);
 
   const handleExportPDF = async () => {
-    const templateComponent = document.querySelector('.resume-preview-container') || 
+    const templateRoot = document.getElementById('resume-template-root');
+    const templateComponent = templateRoot || 
+                              document.querySelector('.resume-preview-container') || 
                               document.querySelector('.resume-preview-modal');
     
     if (!templateComponent) {
       toast.error('PDF download failed. Please try again.');
+      return;
+    }
+
+    // Validate A4 dimensions before export
+    const rect = templateComponent.getBoundingClientRect();
+    const maxA4Width = 595; // A4 width in points
+    
+    if (rect.width > maxA4Width * 1.5) { // Allow some tolerance for scaling
+      toast.error('Resume layout exceeds A4 width. Adjusting layout.');
       return;
     }
 
@@ -54,6 +65,7 @@ export default function Builder() {
         ? `${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
         : 'Resume.pdf';
 
+      // Strict A4 dimensions: 210mm × 297mm = 595pt × 842pt
       const options = {
         margin: 0,
         filename: fileName,
@@ -62,10 +74,15 @@ export default function Builder() {
           scale: 2,
           useCORS: true,
           letterRendering: true,
+          width: 595,
+          height: 842,
+          windowWidth: 595,
+          scrollX: 0,
+          scrollY: 0,
         },
         jsPDF: { 
           unit: 'pt', 
-          format: 'a4', 
+          format: [595, 842], // Exact A4 dimensions in points
           orientation: 'portrait' as const,
         },
       };

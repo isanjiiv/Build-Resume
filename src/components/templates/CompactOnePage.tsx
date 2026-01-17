@@ -10,7 +10,7 @@ interface CompactOnePageProps {
 }
 
 export function CompactOnePage({ data, scale = 1 }: CompactOnePageProps) {
-  const { personalInfo, summary, skills, experience, education, projects, certifications } = data;
+  const { personalInfo, summary, skills, experience, education, projects, certifications, declaration } = data;
 
   return (
     <div 
@@ -144,6 +144,24 @@ export function CompactOnePage({ data, scale = 1 }: CompactOnePageProps) {
           )}
         </div>
       </div>
+
+      {/* Declaration */}
+      {declaration && declaration.text && (
+        <div className="mt-3 pt-2 border-t border-gray-300">
+          <h2 className="text-xs font-bold text-gray-900 uppercase mb-1">Declaration</h2>
+          <p className="text-gray-700 text-justify text-xs mb-2">{declaration.text}</p>
+          <div className="flex justify-between items-end">
+            <div className="text-gray-500 text-xs">
+              {declaration.place && <span>{declaration.place}</span>}
+              {declaration.place && declaration.date && <span> | </span>}
+              {declaration.date && <span>{declaration.date}</span>}
+            </div>
+            <p className="font-semibold text-gray-900 text-xs">
+              {declaration.signatureName || personalInfo.fullName || 'Signature'}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

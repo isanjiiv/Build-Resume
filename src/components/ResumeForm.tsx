@@ -4,8 +4,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2 } from 'lucide-react';
-import { Experience, Education, Project, Certification } from '@/types/resume';
+import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Experience, Education, Project, Certification, Declaration } from '@/types/resume';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const formSteps = [
   'Personal Info',
@@ -15,7 +22,10 @@ const formSteps = [
   'Education',
   'Projects',
   'Certifications',
+  'Declaration',
 ];
+
+const DEFAULT_DECLARATION = 'I hereby declare that the information provided above is true and correct to the best of my knowledge and belief.';
 
 export function ResumeForm() {
   const { resumeData, setResumeData, currentStep, setCurrentStep } = useResume();
@@ -31,9 +41,26 @@ export function ResumeForm() {
     setResumeData(prev => ({ ...prev, summary: value }));
   };
 
-  const updateSkills = (value: string) => {
-    const skills = value.split(',').map(s => s.trim()).filter(Boolean);
-    setResumeData(prev => ({ ...prev, skills }));
+  // Skills management - dynamic array
+  const addSkill = () => {
+    setResumeData(prev => ({
+      ...prev,
+      skills: [...prev.skills, ''],
+    }));
+  };
+
+  const updateSkill = (index: number, value: string) => {
+    setResumeData(prev => ({
+      ...prev,
+      skills: prev.skills.map((skill, i) => (i === index ? value : skill)),
+    }));
+  };
+
+  const removeSkill = (index: number) => {
+    setResumeData(prev => ({
+      ...prev,
+      skills: prev.skills.filter((_, i) => i !== index),
+    }));
   };
 
   const addExperience = () => {
@@ -148,6 +175,20 @@ export function ResumeForm() {
     }));
   };
 
+  // Declaration management
+  const updateDeclaration = (field: keyof Declaration, value: string) => {
+    setResumeData(prev => ({
+      ...prev,
+      declaration: {
+        text: prev.declaration?.text || DEFAULT_DECLARATION,
+        place: prev.declaration?.place || '',
+        date: prev.declaration?.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        signatureName: prev.declaration?.signatureName || '',
+        [field]: value,
+      },
+    }));
+  };
+
   return (
     <div className="h-full overflow-y-auto p-4 md:p-6">
       {/* Step Indicators */}
@@ -189,7 +230,7 @@ export function ResumeForm() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="position">Position (optional)</Label>
+                  <Label htmlFor="position">Position / Job Title *</Label>
                   <Input
                     id="position"
                     value={resumeData.personalInfo.position || ''}
@@ -268,24 +309,53 @@ export function ResumeForm() {
           </Card>
         )}
 
-        {/* Skills */}
+        {/* Skills - Dynamic List */}
         {currentStep === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={resumeData.skills.join(', ')}
-                onChange={(e) => updateSkills(e.target.value)}
-                placeholder="JavaScript, React, Node.js, Python, SQL, AWS..."
-                rows={3}
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                Separate skills with commas. Include both technical and soft skills.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Skills</h3>
+              <Button onClick={addSkill} size="sm" variant="outline">
+                <Plus className="w-4 h-4 mr-1" /> Add Skill
+              </Button>
+            </div>
+            
+            {resumeData.skills.length > 0 ? (
+              <Card>
+                <CardContent className="pt-4 space-y-3">
+                  {resumeData.skills.map((skill, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
+                      <Input
+                        value={skill}
+                        onChange={(e) => updateSkill(idx, e.target.value)}
+                        placeholder={`Skill ${idx + 1} (e.g., JavaScript, React, Python)`}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSkill(idx)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  <p>Add your skills</p>
+                  <p className="text-xs mt-1">Click "Add Skill" to get started. You can add unlimited skills.</p>
+                </CardContent>
+              </Card>
+            )}
+            
+            <p className="text-xs text-muted-foreground">
+              Add as many skills as you need. Include both technical and soft skills.
+            </p>
+          </div>
         )}
 
         {/* Experience */}
@@ -611,6 +681,59 @@ export function ResumeForm() {
               </Card>
             )}
           </div>
+        )}
+
+        {/* Declaration */}
+        {currentStep === 7 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Declaration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="declarationText">Declaration Text</Label>
+                <Textarea
+                  id="declarationText"
+                  value={resumeData.declaration?.text || DEFAULT_DECLARATION}
+                  onChange={(e) => updateDeclaration('text', e.target.value)}
+                  placeholder="I hereby declare that..."
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="declarationPlace">Place</Label>
+                  <Input
+                    id="declarationPlace"
+                    value={resumeData.declaration?.place || ''}
+                    onChange={(e) => updateDeclaration('place', e.target.value)}
+                    placeholder="New Delhi"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="declarationDate">Date</Label>
+                  <Input
+                    id="declarationDate"
+                    value={resumeData.declaration?.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    onChange={(e) => updateDeclaration('date', e.target.value)}
+                    placeholder="January 17, 2026"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="signatureName">Signature Name</Label>
+                <Input
+                  id="signatureName"
+                  value={resumeData.declaration?.signatureName || ''}
+                  onChange={(e) => updateDeclaration('signatureName', e.target.value)}
+                  placeholder={resumeData.personalInfo.fullName || 'Your Name'}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  This will appear as your signature at the bottom of the resume.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Navigation */}

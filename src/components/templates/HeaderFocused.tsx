@@ -10,7 +10,7 @@ interface HeaderFocusedProps {
 }
 
 export function HeaderFocused({ data, scale = 1 }: HeaderFocusedProps) {
-  const { personalInfo, summary, skills, experience, education, projects, certifications } = data;
+  const { personalInfo, summary, skills, experience, education, projects, certifications, declaration } = data;
 
   return (
     <div 
@@ -146,6 +146,28 @@ export function HeaderFocused({ data, scale = 1 }: HeaderFocusedProps) {
                 <p className="text-gray-500 text-xs">Tech: {project.technologies}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Declaration */}
+        {declaration && declaration.text && (
+          <div className="mt-5 pt-4 border-t border-gray-200">
+            <h2 className="text-sm font-bold text-indigo-900 uppercase tracking-wide mb-2">
+              Declaration
+            </h2>
+            <p className="text-gray-700 text-justify text-xs mb-2">{declaration.text}</p>
+            <div className="flex justify-between items-end mt-3">
+              <div className="text-gray-500 text-xs">
+                {declaration.place && <span>Place: {declaration.place}</span>}
+                {declaration.place && declaration.date && <span> | </span>}
+                {declaration.date && <span>Date: {declaration.date}</span>}
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-gray-900 text-xs">
+                  {declaration.signatureName || personalInfo.fullName || 'Signature'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>

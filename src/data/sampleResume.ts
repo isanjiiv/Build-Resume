@@ -89,4 +89,10 @@ export const emptyResumeData: ResumeData = {
   education: [],
   projects: [],
   certifications: [],
+  declaration: {
+    text: 'I hereby declare that the information provided above is true and correct to the best of my knowledge and belief.',
+    place: '',
+    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    signatureName: '',
+  },
 };

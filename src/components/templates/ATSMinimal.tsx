@@ -1,5 +1,9 @@
 import { ResumeData } from '@/types/resume';
 
+// A4 at 72 DPI: 595pt × 842pt
+const A4_WIDTH = 595;
+const A4_HEIGHT = 842;
+
 interface ATSMinimalProps {
   data: ResumeData;
   scale?: number;
@@ -10,14 +14,18 @@ export function ATSMinimal({ data, scale = 1 }: ATSMinimalProps) {
 
   return (
     <div 
-      className="bg-white text-gray-900 p-8 font-resume"
+      className="bg-white text-gray-900 font-resume"
       style={{ 
-        width: 595, 
-        minHeight: 842,
-        transform: `scale(${scale})`,
+        width: A4_WIDTH, 
+        minHeight: A4_HEIGHT,
+        maxWidth: A4_WIDTH,
+        padding: '32px',
+        transform: scale !== 1 ? `scale(${scale})` : undefined,
         transformOrigin: 'top left',
         fontSize: 11,
         lineHeight: 1.4,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
       {/* Header */}

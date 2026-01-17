@@ -6,6 +6,13 @@ import { CreativeProfessional } from './CreativeProfessional';
 import { CorporateClean } from './CorporateClean';
 import { CompactOnePage } from './CompactOnePage';
 
+// A4 dimensions at 96 DPI: 210mm × 297mm = 794px × 1123px
+// Using 595pt × 842pt for PDF generation compatibility (72 DPI)
+export const A4_WIDTH_PX = 794;
+export const A4_HEIGHT_PX = 1123;
+export const A4_WIDTH_PT = 595;
+export const A4_HEIGHT_PT = 842;
+
 interface ResumePreviewProps {
   templateId: TemplateId;
   data: ResumeData;
@@ -24,5 +31,19 @@ export function ResumePreview({ templateId, data, scale = 1 }: ResumePreviewProp
 
   const TemplateComponent = templates[templateId];
 
-  return <TemplateComponent data={data} scale={scale} />;
+  return (
+    <div 
+      id="resume-template-root"
+      className="resume-template"
+      style={{
+        width: A4_WIDTH_PT,
+        minHeight: A4_HEIGHT_PT,
+        maxWidth: A4_WIDTH_PT,
+        margin: '0 auto',
+        overflow: 'hidden',
+      }}
+    >
+      <TemplateComponent data={data} scale={scale} />
+    </div>
+  );
 }

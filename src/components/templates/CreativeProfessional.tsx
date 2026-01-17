@@ -10,7 +10,7 @@ interface CreativeProfessionalProps {
 }
 
 export function CreativeProfessional({ data, scale = 1 }: CreativeProfessionalProps) {
-  const { personalInfo, summary, skills, experience, education, projects, certifications } = data;
+  const { personalInfo, summary, skills, experience, education, projects, certifications, declaration } = data;
 
   return (
     <div 
@@ -153,6 +153,29 @@ export function CreativeProfessional({ data, scale = 1 }: CreativeProfessionalPr
             )}
           </div>
         </div>
+
+        {/* Declaration */}
+        {declaration && declaration.text && (
+          <div className="mt-4 pt-3 border-t border-teal-200">
+            <h2 className="text-sm font-bold text-teal-700 mb-2 flex items-center gap-2">
+              <span className="w-6 h-0.5 bg-teal-500"></span>
+              Declaration
+            </h2>
+            <p className="text-gray-700 text-justify text-xs mb-2">{declaration.text}</p>
+            <div className="flex justify-between items-end mt-3">
+              <div className="text-gray-500 text-xs">
+                {declaration.place && <span>Place: {declaration.place}</span>}
+                {declaration.place && declaration.date && <span> | </span>}
+                {declaration.date && <span>Date: {declaration.date}</span>}
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-teal-700 text-xs">
+                  {declaration.signatureName || personalInfo.fullName || 'Signature'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -320,6 +320,22 @@
     display: none !important;
   }
 
+  /* Fixed column widths for sidebar templates */
+  .resume-template .w-\[180px\],
+  .resume-template .w-\[170px\] {
+    width: 170pt !important;
+    min-width: 170pt !important;
+    max-width: 170pt !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Disable flex/grid auto-sizing in print */
+  .resume-template .flex-1 {
+    flex: 1 1 0 !important;
+    width: calc(595pt - 170pt) !important;
+    max-width: calc(595pt - 170pt) !important;
+  }
+
   /* Page settings */
   @page {
     size: A4 portrait;

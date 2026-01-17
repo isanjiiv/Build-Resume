@@ -44,6 +44,19 @@ export interface Certification {
   link?: string;
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  level?: 'Beginner' | 'Intermediate' | 'Advanced';
+}
+
+export interface Declaration {
+  text: string;
+  place: string;
+  date: string;
+  signatureName: string;
+}
+
 export interface ResumeData {
   personalInfo: PersonalInfo;
   summary: string;
@@ -52,6 +65,7 @@ export interface ResumeData {
   education: Education[];
   projects: Project[];
   certifications: Certification[];
+  declaration?: Declaration;
 }
 
 export type TemplateId = 

@@ -10,15 +10,20 @@ interface ModernSidebarProps {
 }
 
 export function ModernSidebar({ data, scale = 1 }: ModernSidebarProps) {
-  const { personalInfo, summary, skills, experience, education, projects, certifications } = data;
+  const { personalInfo, summary, skills, experience, education, projects, certifications, declaration } = data;
+
+  // Fixed column widths for print: sidebar 170px (≈60mm), main 425px (≈150mm)
+  const SIDEBAR_WIDTH = 170;
+  const MAIN_WIDTH = A4_WIDTH - SIDEBAR_WIDTH;
 
   return (
     <div 
-      className="bg-white text-gray-900 font-resume flex"
+      className="bg-white text-gray-900 font-resume"
       style={{ 
         width: A4_WIDTH, 
         minHeight: A4_HEIGHT,
         maxWidth: A4_WIDTH,
+        display: 'block',
         transform: scale !== 1 ? `scale(${scale})` : undefined,
         transformOrigin: 'top left',
         fontSize: 11,
@@ -27,6 +32,7 @@ export function ModernSidebar({ data, scale = 1 }: ModernSidebarProps) {
         overflow: 'hidden',
       }}
     >
+      <div style={{ display: 'flex', width: '100%' }}>
       {/* Sidebar */}
       <div className="w-[180px] bg-slate-800 text-white p-5">
         <div className="mb-6">
@@ -149,6 +155,29 @@ export function ModernSidebar({ data, scale = 1 }: ModernSidebarProps) {
             ))}
           </div>
         )}
+
+        {/* Declaration */}
+        {declaration && declaration.text && (
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-2">
+              Declaration
+            </h2>
+            <p className="text-gray-700 text-justify text-xs mb-2">{declaration.text}</p>
+            <div className="flex justify-between items-end mt-3">
+              <div className="text-gray-500 text-xs">
+                {declaration.place && <span>Place: {declaration.place}</span>}
+                {declaration.place && declaration.date && <span> | </span>}
+                {declaration.date && <span>Date: {declaration.date}</span>}
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-gray-900 text-xs">
+                  {declaration.signatureName || personalInfo.fullName || 'Signature'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );

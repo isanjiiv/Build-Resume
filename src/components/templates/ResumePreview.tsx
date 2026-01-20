@@ -35,6 +35,7 @@ export function ResumePreview({ templateId, data, scale = 1 }: ResumePreviewProp
     <div 
       id="resume-template-root"
       className="resume-template"
+      data-template-id={templateId}
       style={{
         width: A4_WIDTH_PT,
         minHeight: A4_HEIGHT_PT,

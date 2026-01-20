@@ -39,13 +39,36 @@ export default function Builder() {
   const currentTemplate = templates.find((t) => t.id === selectedTemplate);
 
   const handleExportPDF = async () => {
-    const templateRoot = document.getElementById('resume-template-root');
-    const templateComponent = templateRoot || 
-                              document.querySelector('.resume-preview-container') || 
-                              document.querySelector('.resume-preview-modal');
+    // Wait for DOM to be fully updated with current template
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Target the main preview panel specifically using the ref
+    let templateComponent: Element | null = null;
+    
+    // First, try to find the template in the main preview panel
+    if (previewRef.current) {
+      templateComponent = previewRef.current.querySelector('#resume-template-root');
+    }
+    
+    // Fallback: find the template with matching data-template-id
+    if (!templateComponent) {
+      templateComponent = document.querySelector(`#resume-template-root[data-template-id="${selectedTemplate}"]`);
+    }
+    
+    // Final fallback: get any resume template root
+    if (!templateComponent) {
+      templateComponent = document.getElementById('resume-template-root');
+    }
     
     if (!templateComponent) {
-      toast.error('PDF download failed. Please try again.');
+      toast.error('PDF download failed. Please ensure preview is visible.');
+      return;
+    }
+
+    // Validate that the rendered template matches the selected template
+    const renderedTemplate = templateComponent.getAttribute('data-template-id');
+    if (renderedTemplate && renderedTemplate !== selectedTemplate) {
+      toast.error('Template mismatch detected. Please refresh and try again.');
       return;
     }
 

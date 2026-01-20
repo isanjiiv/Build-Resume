@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import { ResumeData, TemplateId } from '@/types/resume';
 import { ResumePreview } from '@/components/templates/ResumePreview';
 import {
@@ -8,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import html2pdf from 'html2pdf.js';
@@ -30,25 +31,35 @@ export function PreviewModal({
   onExportPDF,
   onExportHTML,
 }: PreviewModalProps) {
-  const modalPreviewRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleModalExportPDF = async () => {
-    // Wait for DOM to be fully updated
-    await new Promise(resolve => setTimeout(resolve, 100));
+    setIsExporting(true);
 
-    // Target the template inside this modal specifically
-    const templateComponent = modalPreviewRef.current?.querySelector('#resume-template-root');
-    
+    // Create a dedicated container for PDF export to ensure correct template
+    const exportContainer = document.createElement('div');
+    exportContainer.id = 'pdf-export-container-modal';
+    exportContainer.style.position = 'absolute';
+    exportContainer.style.left = '-9999px';
+    exportContainer.style.top = '0';
+    exportContainer.style.width = '595pt';
+    exportContainer.style.background = 'white';
+    document.body.appendChild(exportContainer);
+
+    // Render the current template to the export container
+    const root = createRoot(exportContainer);
+    root.render(<ResumePreview templateId={templateId} data={data} scale={1} />);
+
+    // Wait for render to complete
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const templateComponent = exportContainer.querySelector('#resume-template-root');
+
     if (!templateComponent) {
-      // Fallback to parent handler if modal template not found
-      onExportPDF();
-      return;
-    }
-
-    // Validate template matches
-    const renderedTemplate = templateComponent.getAttribute('data-template-id');
-    if (renderedTemplate && renderedTemplate !== templateId) {
-      toast.error('Template mismatch. Please close and reopen the preview.');
+      toast.error('PDF generation failed. Please try again.');
+      root.unmount();
+      document.body.removeChild(exportContainer);
+      setIsExporting(false);
       return;
     }
 
@@ -83,6 +94,11 @@ export function PreviewModal({
     } catch (error) {
       console.error('PDF generation failed:', error);
       toast.error('PDF download failed. Please try again.');
+    } finally {
+      // Cleanup
+      root.unmount();
+      document.body.removeChild(exportContainer);
+      setIsExporting(false);
     }
   };
 
@@ -98,15 +114,19 @@ export function PreviewModal({
               <FileText className="w-4 h-4 mr-2" />
               HTML
             </Button>
-            <Button size="sm" onClick={handleModalExportPDF}>
-              <Download className="w-4 h-4 mr-2" />
-              PDF
+            <Button size="sm" onClick={handleModalExportPDF} disabled={isExporting}>
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {isExporting ? 'Exporting...' : 'PDF'}
             </Button>
           </div>
         </DialogHeader>
         <ScrollArea className="flex-1 h-[calc(90vh-80px)]">
           <div className="p-4 md:p-8 bg-muted min-h-full flex justify-center">
-            <div ref={modalPreviewRef} className="resume-preview-modal bg-white shadow-xl">
+            <div className="resume-preview-modal bg-white shadow-xl">
               <ResumePreview templateId={templateId} data={data} scale={1} />
             </div>
           </div>

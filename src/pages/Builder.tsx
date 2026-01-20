@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import { useNavigate } from 'react-router-dom';
 import { useResume } from '@/context/ResumeContext';
 import { ResumeForm } from '@/components/ResumeForm';
@@ -33,62 +34,45 @@ export default function Builder() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   // Get current template info
   const currentTemplate = templates.find((t) => t.id === selectedTemplate);
 
   const handleExportPDF = async () => {
-    // Wait for DOM to be fully updated with current template
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Target the main preview panel specifically using the ref
-    let templateComponent: Element | null = null;
-    
-    // First, try to find the template in the main preview panel
-    if (previewRef.current) {
-      templateComponent = previewRef.current.querySelector('#resume-template-root');
-    }
-    
-    // Fallback: find the template with matching data-template-id
-    if (!templateComponent) {
-      templateComponent = document.querySelector(`#resume-template-root[data-template-id="${selectedTemplate}"]`);
-    }
-    
-    // Final fallback: get any resume template root
-    if (!templateComponent) {
-      templateComponent = document.getElementById('resume-template-root');
-    }
-    
-    if (!templateComponent) {
-      toast.error('PDF download failed. Please ensure preview is visible.');
-      return;
-    }
-
-    // Validate that the rendered template matches the selected template
-    const renderedTemplate = templateComponent.getAttribute('data-template-id');
-    if (renderedTemplate && renderedTemplate !== selectedTemplate) {
-      toast.error('Template mismatch detected. Please refresh and try again.');
-      return;
-    }
-
-    // Validate A4 dimensions before export
-    const rect = templateComponent.getBoundingClientRect();
-    const maxA4Width = 595; // A4 width in points
-    
-    if (rect.width > maxA4Width * 1.5) { // Allow some tolerance for scaling
-      toast.error('Resume layout exceeds A4 width. Adjusting layout.');
-      return;
-    }
-
     setIsExporting(true);
+
+    // Create a dedicated container for PDF export to ensure correct template
+    const exportContainer = document.createElement('div');
+    exportContainer.id = 'pdf-export-container';
+    exportContainer.style.position = 'absolute';
+    exportContainer.style.left = '-9999px';
+    exportContainer.style.top = '0';
+    exportContainer.style.width = '595pt';
+    exportContainer.style.background = 'white';
+    document.body.appendChild(exportContainer);
+
+    // Render the current template to the export container
+    const root = createRoot(exportContainer);
+    root.render(<ResumePreview templateId={selectedTemplate} data={resumeData} scale={1} />);
+
+    // Wait for render to complete
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const templateComponent = exportContainer.querySelector('#resume-template-root');
+
+    if (!templateComponent) {
+      toast.error('PDF generation failed. Please try again.');
+      root.unmount();
+      document.body.removeChild(exportContainer);
+      setIsExporting(false);
+      return;
+    }
 
     try {
       const fileName = resumeData.personalInfo.fullName
         ? `${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
         : 'Resume.pdf';
 
-      // Strict A4 dimensions: 210mm × 297mm = 595pt × 842pt
       const options = {
         margin: 0,
         filename: fileName,
@@ -105,7 +89,7 @@ export default function Builder() {
         },
         jsPDF: { 
           unit: 'pt', 
-          format: [595, 842], // Exact A4 dimensions in points
+          format: [595, 842],
           orientation: 'portrait' as const,
         },
       };
@@ -116,6 +100,9 @@ export default function Builder() {
       console.error('PDF generation failed:', error);
       toast.error('PDF download failed. Please try again.');
     } finally {
+      // Cleanup
+      root.unmount();
+      document.body.removeChild(exportContainer);
       setIsExporting(false);
     }
   };
@@ -256,7 +243,6 @@ export default function Builder() {
           className={`w-full md:w-1/2 lg:w-[55%] preview-panel ${
             !showPreview ? 'hidden md:flex' : 'flex'
           }`}
-          ref={previewRef}
         >
           <div className="resume-preview-container shadow-elevated rounded-lg overflow-hidden">
             <ResumePreview templateId={selectedTemplate} data={resumeData} />

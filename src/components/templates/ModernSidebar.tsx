@@ -18,7 +18,7 @@ export function ModernSidebar({ data, scale = 1 }: ModernSidebarProps) {
 
   return (
     <div 
-      className="bg-white text-gray-900 font-resume"
+      className="bg-white text-gray-900 font-resume resume-template"
       style={{ 
         width: A4_WIDTH, 
         minHeight: A4_HEIGHT,
@@ -29,7 +29,6 @@ export function ModernSidebar({ data, scale = 1 }: ModernSidebarProps) {
         fontSize: 11,
         lineHeight: 1.4,
         boxSizing: 'border-box',
-        overflow: 'hidden',
       }}
     >
       <div style={{ display: 'flex', width: '100%' }}>

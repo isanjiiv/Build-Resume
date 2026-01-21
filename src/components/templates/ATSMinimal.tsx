@@ -14,7 +14,7 @@ export function ATSMinimal({ data, scale = 1 }: ATSMinimalProps) {
 
   return (
     <div 
-      className="bg-white text-gray-900 font-resume"
+      className="bg-white text-gray-900 font-resume resume-template"
       style={{ 
         width: A4_WIDTH, 
         minHeight: A4_HEIGHT,
@@ -25,7 +25,6 @@ export function ATSMinimal({ data, scale = 1 }: ATSMinimalProps) {
         fontSize: 11,
         lineHeight: 1.4,
         boxSizing: 'border-box',
-        overflow: 'hidden',
       }}
     >
       {/* Header */}

@@ -250,7 +250,6 @@
     transform: none !important;
     transform-origin: top left !important;
     page-break-inside: avoid !important;
-    overflow: hidden !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

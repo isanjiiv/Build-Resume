@@ -14,7 +14,7 @@ export function CompactOnePage({ data, scale = 1 }: CompactOnePageProps) {
 
   return (
     <div 
-      className="bg-white text-gray-900 font-resume"
+      className="bg-white text-gray-900 font-resume resume-template"
       style={{ 
         width: A4_WIDTH, 
         minHeight: A4_HEIGHT,
@@ -25,7 +25,6 @@ export function CompactOnePage({ data, scale = 1 }: CompactOnePageProps) {
         fontSize: 10,
         lineHeight: 1.3,
         boxSizing: 'border-box',
-        overflow: 'hidden',
       }}
     >
       {/* Compact Header */}

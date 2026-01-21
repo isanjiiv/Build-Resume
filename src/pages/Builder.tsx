@@ -73,6 +73,10 @@ export default function Builder() {
         ? `${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
         : 'Resume.pdf';
 
+      // Get actual content height for dynamic PDF sizing
+      const contentHeight = (templateComponent as HTMLElement).scrollHeight || (templateComponent as HTMLElement).offsetHeight;
+      const pdfHeight = Math.max(contentHeight, 842); // Minimum A4 height
+
       const options = {
         margin: 0,
         filename: fileName,
@@ -82,14 +86,14 @@ export default function Builder() {
           useCORS: true,
           letterRendering: true,
           width: 595,
-          height: 842,
+          height: pdfHeight,
           windowWidth: 595,
           scrollX: 0,
           scrollY: 0,
         },
         jsPDF: { 
           unit: 'pt', 
-          format: [595, 842],
+          format: [595, pdfHeight],
           orientation: 'portrait' as const,
         },
       };

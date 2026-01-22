@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Download, FileText, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import html2pdf from 'html2pdf.js';
+import { exportToPDF, generateFilename } from '@/lib/pdfExport';
 
 interface PreviewModalProps {
   open: boolean;
@@ -53,7 +53,7 @@ export function PreviewModal({
     // Wait for render to complete
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const templateComponent = exportContainer.querySelector('#resume-template-root');
+    const templateComponent = exportContainer.querySelector('#resume-template-root') as HTMLElement;
 
     if (!templateComponent) {
       toast.error('PDF generation failed. Please try again.');
@@ -64,36 +64,8 @@ export function PreviewModal({
     }
 
     try {
-      const fileName = data.personalInfo.fullName
-        ? `${data.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
-        : 'Resume.pdf';
-
-      // Get actual content height for dynamic PDF sizing
-      const contentHeight = (templateComponent as HTMLElement).scrollHeight || (templateComponent as HTMLElement).offsetHeight;
-      const pdfHeight = Math.max(contentHeight, 842); // Minimum A4 height
-
-      const options = {
-        margin: 0,
-        filename: fileName,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          width: 595,
-          height: pdfHeight,
-          windowWidth: 595,
-          scrollX: 0,
-          scrollY: 0,
-        },
-        jsPDF: { 
-          unit: 'pt', 
-          format: [595, pdfHeight],
-          orientation: 'portrait' as const,
-        },
-      };
-
-      await html2pdf().set(options).from(templateComponent).save();
+      const fileName = generateFilename(data.personalInfo.fullName);
+      await exportToPDF(templateComponent, { filename: fileName, scale: 2 });
       toast.success('Resume downloaded successfully!');
     } catch (error) {
       console.error('PDF generation failed:', error);

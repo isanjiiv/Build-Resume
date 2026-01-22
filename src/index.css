@@ -237,7 +237,7 @@
     print-color-adjust: exact !important;
   }
 
-  /* Resume template print styles */
+  /* Resume template print styles - fixed width, dynamic height */
   #resume-template-root,
   .resume-template,
   [class*="font-resume"] {
@@ -276,6 +276,7 @@
   .bg-slate-800 { background-color: #1e293b !important; }
   .bg-teal-500 { background-color: #14b8a6 !important; }
   .bg-teal-600 { background-color: #0d9488 !important; }
+  .bg-indigo-900 { background-color: #312e81 !important; }
 
   /* Preserve text colors */
   .text-white { color: #ffffff !important; }
@@ -294,7 +295,13 @@
   .text-teal-500 { color: #14b8a6 !important; }
   .text-teal-600 { color: #0d9488 !important; }
   .text-slate-100 { color: #f1f5f9 !important; }
+  .text-slate-200 { color: #e2e8f0 !important; }
   .text-slate-300 { color: #cbd5e1 !important; }
+  .text-slate-400 { color: #94a3b8 !important; }
+  .text-indigo-200 { color: #c7d2fe !important; }
+  .text-indigo-300 { color: #a5b4fc !important; }
+  .text-indigo-700 { color: #4338ca !important; }
+  .text-indigo-900 { color: #312e81 !important; }
 
   /* Preserve fonts */
   .font-resume,
@@ -305,8 +312,13 @@
   /* Preserve border colors */
   .border-gray-200 { border-color: #e5e7eb !important; }
   .border-gray-300 { border-color: #d1d5db !important; }
+  .border-gray-400 { border-color: #9ca3af !important; }
   .border-blue-200 { border-color: #bfdbfe !important; }
+  .border-blue-700 { border-color: #1d4ed8 !important; }
   .border-teal-200 { border-color: #99f6e4 !important; }
+  .border-teal-500 { border-color: #14b8a6 !important; }
+  .border-indigo-200 { border-color: #c7d2fe !important; }
+  .border-slate-600 { border-color: #475569 !important; }
 
   /* Hide non-printable elements */
   .no-print,
@@ -316,23 +328,21 @@
     display: none !important;
   }
 
-  /* Fixed column widths for sidebar templates */
+  /* Fixed sidebar widths for two-column templates */
   .resume-template .w-\[180px\],
   .resume-template .w-\[170px\] {
-    width: 170pt !important;
-    min-width: 170pt !important;
-    max-width: 170pt !important;
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
     flex-shrink: 0 !important;
   }
 
-  /* Disable flex/grid auto-sizing in print */
+  /* Main content area fills remaining space */
   .resume-template .flex-1 {
-    flex: 1 1 0 !important;
-    width: calc(595pt - 170pt) !important;
-    max-width: calc(595pt - 170pt) !important;
+    flex: 1 1 auto !important;
   }
 
-  /* Page settings */
+  /* Page settings - allow content to flow naturally */
   @page {
     size: A4 portrait;
     margin: 0;

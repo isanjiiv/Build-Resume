@@ -5,6 +5,7 @@ import { useResume } from '@/context/ResumeContext';
 import { ResumeForm } from '@/components/ResumeForm';
 import { ResumePreview } from '@/components/templates/ResumePreview';
 import { PreviewModal } from '@/components/PreviewModal';
+import { PDFPreviewModal } from '@/components/PDFPreviewModal';
 import { templates } from '@/data/templates';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +34,7 @@ export default function Builder() {
   const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
   const [showPreview, setShowPreview] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   // Get current template info
@@ -161,7 +163,16 @@ export default function Builder() {
               disabled={!hasData}
             >
               <Eye className="w-4 h-4 mr-2" />
-              Preview Resume
+              Preview
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setPdfPreviewOpen(true)}
+              disabled={!hasData}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Preview PDF
             </Button>
             <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
               <Globe className="w-4 h-4 mr-2" />
@@ -259,6 +270,14 @@ export default function Builder() {
         data={resumeData}
         onExportPDF={handleExportPDF}
         onExportHTML={handleExportHTML}
+      />
+
+      {/* PDF Preview Modal - Shows exact A4 format */}
+      <PDFPreviewModal
+        open={pdfPreviewOpen}
+        onOpenChange={setPdfPreviewOpen}
+        templateId={selectedTemplate}
+        data={resumeData}
       />
     </div>
   );

@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
+# 🚀 BuildResume – Resume & Portfolio Builder (Web App)
 
-## Project info
+**BuildResume** is a modern, user-friendly **Resume & Portfolio Builder** that helps users create professional resumes with a clean design, structured sections, and an easy editing experience.  
+The platform is built to support quick resume creation, live editing, and smooth export options for job-ready documents.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🔗 **Live Project:** https://buildresume.lovable.app/
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ✨ Key Features
 
-**Use Lovable**
+- **Modern Resume Templates**
+  - Choose from multiple clean and professional templates
+  - Designed for freshers, experienced professionals, and IT roles
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Easy Resume Builder**
+  - Fill in details like Profile, Skills, Education, Experience, Projects, and Certifications
+  - Simple and structured form-based editing
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Live Preview**
+  - Real-time resume preview while editing
+  - Helps users see exactly how the final resume will look
 
-**Use your preferred IDE**
+- **Download / Export**
+  - Export resume as **PDF**
+  - Resume formatting optimized for professional use
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Mobile + Desktop Friendly**
+  - Fully responsive UI
+  - Works smoothly on both web and mobile screens
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🛠️ Tech & Tools Used
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Lovable AI** (No-code + AI-powered development)
+- Responsive UI design
+- Modern template-based resume rendering
+- PDF export and layout formatting
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🎯 Use Cases
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- Students creating their first resume  
+- IT Engineers & Freshers applying for jobs  
+- Professionals updating resumes quickly  
+- Users who want a simple and clean resume builder without complex tools  
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📌 Future Improvements (Planned)
 
-**Use GitHub Codespaces**
+- More resume templates (ATS-focused + modern designs)
+- Custom sections (Awards, Publications, Volunteer work)
+- Multiple resume versions per user
+- Better A4 PDF sizing and print layout support
+- Shareable resume link / hosted portfolio page
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 👨‍💻 Project Created By
 
-This project is built with:
+**Sanjeev Kumar**  
+IT Engineer | System Administrator | Networking | Cloud | Security  
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- <img src="https://cdn.simpleicons.org/googlechrome/0A66C2" width="18" /> Website: https://www.wayoftech.net/  
+- <img src="https://cdn.simpleicons.org/linkedin/0A66C2" width="18" /> LinkedIn: https://www.linkedin.com/in/isanjiiv/  
+- <img src="https://cdn.simpleicons.org/instagram/E4405F" width="18" /> Instagram: https://www.instagram.com/isanjiiv/  
+- <img src="https://cdn.simpleicons.org/youtube/FF0000" width="18" /> YouTube: https://www.youtube.com/@isanjiiv  

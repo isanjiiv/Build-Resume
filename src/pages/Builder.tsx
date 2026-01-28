@@ -24,6 +24,8 @@ import {
   Globe,
   Palette,
   Loader2,
+  Save,
+  Upload,
 } from 'lucide-react';
 import { TemplateId } from '@/types/resume';
 import { toast } from 'sonner';
@@ -31,7 +33,7 @@ import { exportToPDF, generateFilename } from '@/lib/pdfExport';
 
 export default function Builder() {
   const navigate = useNavigate();
-  const { resumeData, selectedTemplate, setSelectedTemplate } = useResume();
+  const { resumeData, setResumeData, selectedTemplate, setSelectedTemplate } = useResume();
   const [showPreview, setShowPreview] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
@@ -120,6 +122,52 @@ export default function Builder() {
     navigate('/portfolio');
   };
 
+  const handleSaveResume = () => {
+    const dataToSave = {
+      resumeData,
+      selectedTemplate,
+      savedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `resume-${resumeData.personalInfo.fullName?.toLowerCase().replace(/\s+/g, '-') || 'data'}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Resume saved to file!');
+  };
+
+  const handleLoadResume = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target?.result as string);
+          if (data.resumeData) {
+            setResumeData(data.resumeData);
+            if (data.selectedTemplate) {
+              setSelectedTemplate(data.selectedTemplate);
+            }
+            toast.success('Resume loaded successfully!');
+          } else {
+            toast.error('Invalid resume file format');
+          }
+        } catch {
+          toast.error('Failed to parse resume file');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   const hasData = resumeData.personalInfo.fullName || resumeData.summary || resumeData.skills.length > 0;
 
   return (
@@ -177,6 +225,14 @@ export default function Builder() {
             <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
               <Globe className="w-4 h-4 mr-2" />
               Portfolio
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleSaveResume} disabled={!hasData}>
+              <Save className="w-4 h-4 mr-2" />
+              Save
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLoadResume}>
+              <Upload className="w-4 h-4 mr-2" />
+              Load
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportHTML} disabled={!hasData}>
               <FileText className="w-4 h-4 mr-2" />
@@ -249,6 +305,12 @@ export default function Builder() {
         </Button>
         <Button variant="outline" size="sm" onClick={handleViewPortfolio}>
           <Globe className="w-4 h-4" />
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleSaveResume} disabled={!hasData}>
+          <Save className="w-4 h-4" />
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleLoadResume}>
+          <Upload className="w-4 h-4" />
         </Button>
         <Button variant="outline" size="sm" onClick={handleExportHTML} disabled={!hasData}>
           <FileText className="w-4 h-4" />

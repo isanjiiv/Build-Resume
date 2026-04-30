@@ -32,8 +32,55 @@ const DEFAULT_DECLARATION = 'I hereby declare that the information provided abov
 
 export function ResumeForm() {
   const { resumeData, setResumeData, currentStep, setCurrentStep } = useResume();
+  const [aiLoading, setAiLoading] = useState<string | null>(null);
 
-  const updatePersonalInfo = (field: string, value: string) => {
+  const runAI = async (key: string, fn: () => Promise<void>) => {
+    setAiLoading(key);
+    try {
+      await fn();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'AI request failed');
+    } finally {
+      setAiLoading(null);
+    }
+  };
+
+  const aiGenerateSummary = () =>
+    runAI('summary', async () => {
+      const jobTitle = resumeData.personalInfo.position || resumeData.personalInfo.fullName;
+      if (!jobTitle) { toast.error('Add your job title first (Personal Info)'); return; }
+      const ctx = resumeData.experience.map(e => `${e.position} at ${e.company}: ${e.description}`).join('\n');
+      const result = await aiAssist({ mode: 'summary', jobTitle, context: ctx });
+      setResumeData(prev => ({ ...prev, summary: String(result) }));
+      toast.success('Summary generated');
+    });
+
+  const aiSuggestSkills = () =>
+    runAI('skills', async () => {
+      const jobTitle = resumeData.personalInfo.position;
+      if (!jobTitle) { toast.error('Add your job title first (Personal Info)'); return; }
+      const result = await aiAssist({ mode: 'skills', jobTitle });
+      const list = Array.isArray(result) ? result : [];
+      setResumeData(prev => ({ ...prev, skills: Array.from(new Set([...prev.skills.filter(Boolean), ...list])) }));
+      toast.success(`Added ${list.length} skill suggestions`);
+    });
+
+  const aiGenerateBullets = (expId: string) =>
+    runAI(`bullets-${expId}`, async () => {
+      const exp = resumeData.experience.find(e => e.id === expId);
+      if (!exp) return;
+      const jobTitle = exp.position || resumeData.personalInfo.position;
+      if (!jobTitle) { toast.error('Add the position title first'); return; }
+      const ctx = `Company: ${exp.company}. Existing notes: ${exp.description || '(none)'}`;
+      const result = await aiAssist({ mode: 'bullets', jobTitle, context: ctx });
+      const bullets = Array.isArray(result) ? result : [];
+      const text = bullets.map(b => `• ${b}`).join('\n');
+      setResumeData(prev => ({
+        ...prev,
+        experience: prev.experience.map(e => e.id === expId ? { ...e, description: text } : e),
+      }));
+      toast.success('Bullets generated');
+    });
     setResumeData(prev => ({
       ...prev,
       personalInfo: { ...prev.personalInfo, [field]: value },

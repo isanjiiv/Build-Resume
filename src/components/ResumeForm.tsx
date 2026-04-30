@@ -81,6 +81,8 @@ export function ResumeForm() {
       }));
       toast.success('Bullets generated');
     });
+
+  const updatePersonalInfo = (field: string, value: string) => {
     setResumeData(prev => ({
       ...prev,
       personalInfo: { ...prev.personalInfo, [field]: value },

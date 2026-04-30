@@ -74,7 +74,11 @@ export type TemplateId =
   | 'header-focused'
   | 'creative-professional'
   | 'corporate-clean'
-  | 'compact-one-page';
+  | 'compact-one-page'
+  | 'elegant-serif'
+  | 'tech-modern'
+  | 'executive-bold'
+  | 'creative-gradient';
 
 export interface Template {
   id: TemplateId;

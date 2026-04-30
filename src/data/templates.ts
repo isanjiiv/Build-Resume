@@ -37,4 +37,28 @@ export const templates: Template[] = [
     description: 'Maximum information density for experienced professionals',
     tags: ['Compact', 'Dense', 'Experienced'],
   },
+  {
+    id: 'elegant-serif',
+    name: 'Elegant Serif',
+    description: 'Timeless serif typography with refined spacing for a polished, classic look',
+    tags: ['Minimal', 'Classic', 'Elegant'],
+  },
+  {
+    id: 'tech-modern',
+    name: 'Tech Modern',
+    description: 'Developer-friendly layout with monospace accents and skill chips',
+    tags: ['Modern', 'Tech', 'Developer'],
+  },
+  {
+    id: 'executive-bold',
+    name: 'Executive Bold',
+    description: 'Dark statement header for senior leaders and executives',
+    tags: ['Executive', 'Bold', 'Leadership'],
+  },
+  {
+    id: 'creative-gradient',
+    name: 'Creative Gradient',
+    description: 'Vibrant gradient header with pill skill tags for creative roles',
+    tags: ['Creative', 'Modern', 'Colorful'],
+  },
 ];

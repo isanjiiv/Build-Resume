@@ -1,125 +1,182 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { templates } from '@/data/templates';
 import { TemplateCard } from '@/components/TemplateCard';
 import { TemplateId } from '@/types/resume';
 import { useResume } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileText, Sparkles, Download, Globe } from 'lucide-react';
+import {
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  Star,
+  ShieldCheck,
+  Zap,
+  FileText,
+} from 'lucide-react';
+
+const CATEGORIES = [
+  'All',
+  'Professional',
+  'Modern',
+  'Creative',
+  'Simple',
+  'Executive',
+  'Tech',
+] as const;
+
+type Category = (typeof CATEGORIES)[number];
 
 export default function Index() {
   const navigate = useNavigate();
   const { selectedTemplate, setSelectedTemplate } = useResume();
-  const [hoveredTemplate, setHoveredTemplate] = useState<TemplateId | null>(null);
+  const [category, setCategory] = useState<Category>('All');
 
-  const handleTemplateSelect = (id: TemplateId) => {
+  const filtered = useMemo(() => {
+    if (category === 'All') return templates;
+    return templates.filter((t) =>
+      t.tags?.some((tag) => tag.toLowerCase().includes(category.toLowerCase())),
+    );
+  }, [category]);
+
+  const handleSelect = (id: TemplateId) => setSelectedTemplate(id);
+  const handleUse = (id: TemplateId) => {
     setSelectedTemplate(id);
-  };
-
-  const handleStartBuilding = () => {
     navigate('/builder');
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
+      {/* Top nav */}
+      <nav className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-30">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-lg">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <FileText className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span>BuildResume</span>
+          </div>
+          <Button size="sm" onClick={() => navigate('/builder')}>
+            Create my resume
+            <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button>
+        </div>
+      </nav>
+
+      {/* Hero */}
       <header className="relative overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-40"
+        <div
+          className="absolute inset-0 opacity-60"
           style={{ background: 'var(--gradient-hero)' }}
         />
-        <div className="relative container mx-auto px-4 py-16 md:py-24">
+        <div className="relative container mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-16">
           <div className="max-w-3xl mx-auto text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Sparkles className="w-4 h-4" />
-              Professional Resume Builder
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-6 border border-primary/20">
+              <Sparkles className="w-3.5 h-3.5" />
+              AI-powered • ATS-friendly
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight">
-              Build Your Perfect Resume
-              <span className="block gradient-text">in Minutes</span>
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-5 tracking-tight leading-[1.05]">
+              Pick a template.
+              <span className="block gradient-text">Land the interview.</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Choose from professionally designed templates, fill in your details, and export 
-              a stunning resume that gets you noticed by employers.
+            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Professionally designed, recruiter-approved resume templates. Customize in minutes
+              and download as a pixel-perfect PDF.
             </p>
-            
-            {/* Features */}
-            <div className="flex flex-wrap justify-center gap-6 mb-12">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-sm">ATS-Friendly</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Download className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-sm">PDF Export</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Globe className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-sm">Portfolio Page</span>
-              </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-primary" /> Free, no signup
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-primary" /> ATS-optimized
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Zap className="w-4 h-4 text-primary" /> AI suggestions
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Star className="w-4 h-4 text-primary fill-primary" /> 4.9/5 from users
+              </span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Template Selection */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 animate-slide-up">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-              Choose Your Template
+      {/* Templates section */}
+      <main className="container mx-auto px-4 pb-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8 animate-slide-up">
+            <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3 tracking-tight">
+              Choose your resume template
             </h2>
-            <p className="text-muted-foreground">
-              Select a template to get started. You can always change it later.
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Hover any template and click <span className="font-medium text-foreground">Use this template</span>{' '}
+              to start building. You can switch templates anytime.
             </p>
           </div>
 
-          {/* Template Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {templates.map((template, idx) => (
+          {/* Category filter */}
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                  category === cat
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-card text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-14">
+            {filtered.map((template, idx) => (
               <div
                 key={template.id}
                 className="animate-slide-up"
-                style={{ animationDelay: `${idx * 100}ms` }}
+                style={{ animationDelay: `${idx * 60}ms` }}
               >
                 <TemplateCard
                   templateId={template.id}
                   isSelected={selectedTemplate === template.id}
-                  onSelect={handleTemplateSelect}
+                  onSelect={handleSelect}
+                  onUse={handleUse}
                 />
               </div>
             ))}
           </div>
 
+          {filtered.length === 0 && (
+            <div className="text-center text-muted-foreground py-16">
+              No templates in this category yet.
+            </div>
+          )}
+
           {/* CTA */}
           <div className="text-center animate-fade-in">
             <Button
               size="lg"
-              onClick={handleStartBuilding}
-              className="px-8 py-6 text-lg font-semibold shadow-elevated hover:shadow-card-hover transition-all duration-300"
+              onClick={() => navigate('/builder')}
+              className="px-8 py-6 text-base font-semibold shadow-[var(--shadow-elevated)] hover:shadow-[var(--shadow-card-hover)] transition-all"
             >
-              Start Building Your Resume
+              Start building with selected template
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <p className="text-sm text-muted-foreground mt-4">
-              Free to use • No signup required • Export anytime
+              Free forever • No signup required • Download unlimited PDFs
             </p>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Build professional resumes that stand out. All templates are ATS-friendly.</p>
-          </div>
+      <footer className="border-t border-border">
+        <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
+          Build professional, ATS-friendly resumes that get noticed.
         </div>
       </footer>
     </div>

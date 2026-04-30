@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { useResume } from '@/context/ResumeContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Sparkles, Loader2 } from 'lucide-react';
 import { Experience, Education, Project, Certification, Declaration } from '@/types/resume';
+import { aiAssist } from '@/lib/aiAssist';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -29,6 +32,55 @@ const DEFAULT_DECLARATION = 'I hereby declare that the information provided abov
 
 export function ResumeForm() {
   const { resumeData, setResumeData, currentStep, setCurrentStep } = useResume();
+  const [aiLoading, setAiLoading] = useState<string | null>(null);
+
+  const runAI = async (key: string, fn: () => Promise<void>) => {
+    setAiLoading(key);
+    try {
+      await fn();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'AI request failed');
+    } finally {
+      setAiLoading(null);
+    }
+  };
+
+  const aiGenerateSummary = () =>
+    runAI('summary', async () => {
+      const jobTitle = resumeData.personalInfo.position || resumeData.personalInfo.fullName;
+      if (!jobTitle) { toast.error('Add your job title first (Personal Info)'); return; }
+      const ctx = resumeData.experience.map(e => `${e.position} at ${e.company}: ${e.description}`).join('\n');
+      const result = await aiAssist({ mode: 'summary', jobTitle, context: ctx });
+      setResumeData(prev => ({ ...prev, summary: String(result) }));
+      toast.success('Summary generated');
+    });
+
+  const aiSuggestSkills = () =>
+    runAI('skills', async () => {
+      const jobTitle = resumeData.personalInfo.position;
+      if (!jobTitle) { toast.error('Add your job title first (Personal Info)'); return; }
+      const result = await aiAssist({ mode: 'skills', jobTitle });
+      const list = Array.isArray(result) ? result : [];
+      setResumeData(prev => ({ ...prev, skills: Array.from(new Set([...prev.skills.filter(Boolean), ...list])) }));
+      toast.success(`Added ${list.length} skill suggestions`);
+    });
+
+  const aiGenerateBullets = (expId: string) =>
+    runAI(`bullets-${expId}`, async () => {
+      const exp = resumeData.experience.find(e => e.id === expId);
+      if (!exp) return;
+      const jobTitle = exp.position || resumeData.personalInfo.position;
+      if (!jobTitle) { toast.error('Add the position title first'); return; }
+      const ctx = `Company: ${exp.company}. Existing notes: ${exp.description || '(none)'}`;
+      const result = await aiAssist({ mode: 'bullets', jobTitle, context: ctx });
+      const bullets = Array.isArray(result) ? result : [];
+      const text = bullets.map(b => `• ${b}`).join('\n');
+      setResumeData(prev => ({
+        ...prev,
+        experience: prev.experience.map(e => e.id === expId ? { ...e, description: text } : e),
+      }));
+      toast.success('Bullets generated');
+    });
 
   const updatePersonalInfo = (field: string, value: string) => {
     setResumeData(prev => ({
@@ -292,8 +344,12 @@ export function ResumeForm() {
         {/* Summary */}
         {currentStep === 1 && (
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-lg">Professional Summary</CardTitle>
+              <Button size="sm" variant="outline" onClick={aiGenerateSummary} disabled={aiLoading === 'summary'}>
+                {aiLoading === 'summary' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                AI Generate
+              </Button>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -303,7 +359,7 @@ export function ResumeForm() {
                 rows={5}
               />
               <p className="text-xs text-muted-foreground mt-2">
-                Tip: Keep it concise (2-3 sentences) and focus on your value proposition.
+                Tip: Keep it concise (2-3 sentences). Use AI Generate to draft from your job title and experience.
               </p>
             </CardContent>
           </Card>
@@ -314,9 +370,15 @@ export function ResumeForm() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Skills</h3>
-              <Button onClick={addSkill} size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" /> Add Skill
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={aiSuggestSkills} size="sm" variant="outline" disabled={aiLoading === 'skills'}>
+                  {aiLoading === 'skills' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  AI Suggest
+                </Button>
+                <Button onClick={addSkill} size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-1" /> Add Skill
+                </Button>
+              </div>
             </div>
             
             {resumeData.skills.length > 0 ? (
@@ -429,12 +491,26 @@ export function ResumeForm() {
                     <Label htmlFor={`current-${exp.id}`} className="text-sm">Currently working here</Label>
                   </div>
                   <div>
-                    <Label>Description</Label>
+                    <div className="flex justify-between items-center mb-1">
+                      <Label>Description</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => aiGenerateBullets(exp.id)}
+                        disabled={aiLoading === `bullets-${exp.id}`}
+                      >
+                        {aiLoading === `bullets-${exp.id}`
+                          ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          : <Sparkles className="w-3 h-3 mr-1" />}
+                        AI Bullets
+                      </Button>
+                    </div>
                     <Textarea
                       value={exp.description}
                       onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
                       placeholder="Describe your key responsibilities and achievements..."
-                      rows={3}
+                      rows={4}
                     />
                   </div>
                 </CardContent>
